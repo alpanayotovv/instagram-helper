@@ -87,8 +87,8 @@ class Client {
 		if ( isset ( $request_body->access_token ) ) {
 			update_option( 'crb_instagram_access_token', $request_body->access_token );
 			_e('Authentication completed!', 'crb');
-			exit;
 		}
+		exit;
 	}
 
 	private function get_user_id(){
