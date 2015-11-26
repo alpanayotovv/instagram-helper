@@ -1,8 +1,6 @@
 <?php 
 namespace Client;
 
-use Carbon_Helper;
-
 /**
 * 
 */
@@ -15,7 +13,7 @@ class Client {
 		'redirect_url'  => '',
 	);
 
-	protected $carbon_config_fields = array(
+	public $carbon_config_fields = array(
 		'user_name'     => 'crb_instagram_username',
 		'client_id'     => 'crb_instagram_client_id',
 		'client_secret' => 'crb_instagram_client_secret',
@@ -48,7 +46,7 @@ class Client {
 		$base   = 'https://api.instagram.com/oauth/authorize/';
 		$params = array(
 			'client_id'     => $this->config[ 'client_id' ],
-			'redirect_uri'  => $this->config[ 'redirect_uri' ],
+			'redirect_uri'  => $this->config[ 'redirect_url' ],
 			'response_type' => 'code',
 		);
 
