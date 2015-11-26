@@ -3,7 +3,6 @@ namespace Instagram_Factory;
 
 use Client;
 use Data_Manager;
-use Datastore;
 use Carbon_Helper;
 
 /**
