@@ -4,6 +4,7 @@ namespace Instagram_Factory;
 use Client;
 use Data_Manager;
 use Carbon_Helper;
+use Posts_Store;
 
 /**
 * 
@@ -14,6 +15,7 @@ class Instagram_Factory {
 		'Client\Client'               => 'client',       
 		'Data_Manager\Data_Manager'   => 'data_manager' ,
 		'Carbon_Helper\Carbon_Helper' => 'carbon_helper',
+		'Posts_Store\Posts_Store'     => 'posts_store',
 	);
 
 	public static function create( $class, $params=array() ){
