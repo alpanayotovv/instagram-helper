@@ -1,17 +1,17 @@
 <?php 
 namespace Data_Manager;
 
-use Transient_Store;
-
 class Data_Manager {
 	
 	private $feed_data          = array();
+	private $request_data       = array();
 	private $limit              = 4;
+	private $constructor_limit  = '';
 	private $transient_lifetime = 300;
 	private $access_token;
 	private $user_id;
-	
-	function __construct( $params=array() ){
+
+	function __construct( $user_config = array() ){
 		$this->access_token = get_option( 'crb_instagram_access_token' );
 		$this->user_id      = get_option( 'crb_instagram_user_id' );
 		
@@ -19,68 +19,32 @@ class Data_Manager {
 			return;
 		}
 
-		if ( isset( $params[ 'limit' ] ) ) {
-			$this->set_limit( $params[ 'limit' ] );
+		if ( isset( $user_config[ 'limit' ] ) ) {
+			$this->set_limit( $user_config[ 'limit' ] );
+			$this->constructor_limit = $user_config[ 'limit' ];
 		}
 	}
 	
-	public function fetch_user_feed( $limit = '', $use_transient = true, $request_url = '' ) {
-		if ( ! $this->access_token || ! $this->user_id ) {
-			return;
-		}
+	public function fetch_user_feed( $call_params = array() ) {
 
-		$cache = false;
+		$parameters = array(
+			'initial_url'      => $this->build_user_request_url( $call_params[ 'limit' ] ),
+			'request_url'      => $call_params[ 'request_url' ],
+			'request_function' => 'fetch_user_feed',
+		);
 
-		if ( $limit ) {
-			$this->set_limit();
-		}
-		
-		if ( ! $request_url ) {
-			
-			$request_url = $this->build_user_request_url();
-			$cache = $this->check_for_cache( $request_url );
-		}
-
-		if ( ! $cache ) {
-			$this->handle_request( $request_url, 'fetch_user_feed' );
-		} else {
-			$this->feed_data = $cache;
-		}
+		$this->prepare_request( $parameters );
 	}
 
-	public function fetch_hashtag_feed( $hashtag, $limit = '', $use_transient = true, $request_url = '' ){
-		if ( ! $this->access_token || ! $this->user_id ) {
-			return;
-		}
+	public function fetch_hashtag_feed( $call_params = array() ){
 
-		$cache = false;
+		$parameters = array(
+			'initial_url'      => $this->build_hashtag_request_url( $call_params[ 'hashtag' ], $call_params[ 'limit' ] ),
+			'request_url'      => $call_params[ 'request_url' ],
+			'request_function' => 'fetch_hashtag_feed',
+		);
 
-		if ( $limit ) {
-			$this->set_limit( $limit );
-		}
-		
-		if ( ! $request_url ) {
-			$request_url = $this->build_hashtag_request_url();
-			$cache       = $this->check_for_cache( $request_url );
-		}
-
-		if ( ! $cache ) {
-			$this->handle_request( $request_url, 'fetch_hashtag_feed' );
-		} else {
-			$this->feed_data = $cache;
-		}
-	}
-
-	public function set_limit( $limit ) {
-		if ( ! is_int( $limit ) ) {
-			return;
-		}
-
-		$this->limit = $limit;
-	}
-
-	public function get_limit() {
-		return $this->limit;
+		$this->prepare_request( $parameters );
 	}
 
 	public function get_feed_data(){
@@ -92,13 +56,24 @@ class Data_Manager {
 	}
 
 	public function flush_cache(){
+		global $wpdb;
+		
 		$this->clear_feed_data();
 
-		$user_cache    = 'instagram::' . md5( $this->build_user_request_url() );
-		$hashtag_cache = 'instagram::' . md5( $this->build_hashtag_request_url() );
+		$transients = $wpdb->get_results( 
+			"SELECT option_name AS name
+			FROM $wpdb->options
+			WHERE option_name 
+			LIKE '%instagram::%'"
+		);
 
-		delete_transient( $user_cache );
-		delete_transient( $hashtag_cache );
+		if ( empty( $transients ) ) {
+			return;
+		}
+
+		foreach ( $transients as $transient ) {
+			delete_option( $transient->name );
+		}
 	}
 
 	public function get_transient_lifetime(){
@@ -113,7 +88,30 @@ class Data_Manager {
 		$this->transient_lifetime = $lifetime;
 	}
 
-	private function build_user_request_url(){ 
+	private function prepare_request( $parameters ){
+		if ( ! $this->access_token || ! $this->user_id ) {
+			return;
+		}
+
+		$cache = false;
+
+		if ( ! $parameters[ 'request_url' ] ) {
+			$parameters[ 'request_url' ] = $parameters[ 'initial_url' ];
+			$cache                       = $this->check_for_cache( $parameters[ 'request_url' ] );
+		}
+
+		if ( ! $cache ) {
+			$this->execute_request( $parameters[ 'request_url' ], $parameters[ 'request_function' ] );
+		} else {
+			$this->feed_data = $cache;
+		}
+	}
+
+	private function build_user_request_url( $limit = '' ){ 
+		if ( $limit ) {
+			$this->set_limit( $limit );
+		}
+
 		$base   = 'https://api.instagram.com/v1/users/'. $this->user_id .'/media/recent/';
 		$params = array(
 			'access_token' => $this->access_token,
@@ -123,7 +121,11 @@ class Data_Manager {
 		return add_query_arg( $params, $base );
 	}
 
-	private function build_hashtag_request_url(){
+	private function build_hashtag_request_url( $hashtag, $limit = '' ){
+		if ( $limit ) {
+			$this->set_limit( $limit );
+		}
+
 		$base   = 'https://api.instagram.com/v1/tags/' . $hashtag . '/media/recent/';
 		$params = array(
 			'access_token' => $this->access_token,
@@ -131,6 +133,57 @@ class Data_Manager {
 		);
 
 		return add_query_arg( $params, $base );
+	}
+
+	private function execute_request( $request_url, $calling_function ) {
+
+		$request = wp_remote_get( $request_url );
+		if ( is_wp_error( $request ) || ( $request[ 'response' ][ 'code' ] !== 200 ) )  { 
+			return;
+		}
+
+		$response = json_decode( $request[ 'body' ] );
+
+		if ( isset( $response->error_type ) ) {
+			if ( $response->error_type === 'OAuthAccessTokenError' ) {
+				delete_option( 'crb_instagram_access_token' );
+				return;
+			}
+		}
+		
+		$this->request_data = array_merge( $this->request_data, $response->data );
+		$request_data_count = count( $this->request_data );
+		$transient_key      = 'instagram::' . md5( $request_url );
+
+		if ( isset( $response->pagination->next_url ) && ( $request_data_count < $this->get_limit() ) ) {
+			$call_params = array(
+				'limit'       => '',
+				'hashtag'     => '',
+				'request_url' => $response->pagination->next_url,
+			);
+
+			$this->$calling_function( $call_params );
+		} else {
+
+			if ( $request_data_count > $this->get_limit() ) {
+				$chunks             = array_chunk( $this->request_data, $this->get_limit() );
+				$this->request_data = $chunks[ 0 ];
+			}
+
+			$this->set_feed_data( $this->request_data );
+			$this->set_cache( $transient_key );
+			$this->request_data = array();
+			$this->set_limit( $this->constructor_limit );
+		}
+
+	}
+
+	private function set_feed_data( $data ) {
+		$this->feed_data = array_merge( $data, $this->feed_data );
+	}
+
+	private function set_cache( $transient_key ) {
+		set_transient( $transient_key, $this->feed_data, $this->get_transient_lifetime() );
 	}
 
 	private function check_for_cache( $request_url ){
@@ -145,34 +198,15 @@ class Data_Manager {
 		}
 	}
 
-	private function handle_request( $request_url, $calling_function ) {
-		$request = wp_remote_get( $request_url );
-
-		if ( is_wp_error( $request ) || ( $request[ 'response' ][ 'code' ] !== 200 ) )  { 
+	private function set_limit( $limit ) {
+		if ( ! is_int( $limit ) ) {
 			return;
 		}
 
-		$response = json_decode( $request[ 'body' ] );
+		$this->limit = $limit;
+	}
 
-		if ( isset( $response->error_type ) ) {
-			if ( $response->error_type === 'OAuthAccessTokenError' ) {
-				delete_option( 'crb_instagram_access_token' );
-				return;
-			}
-		}
-		
-		$this->feed_data = array_merge( $this->feed_data, $response->data );
-		$transient_key = 'instagram::' . md5( $request_url );
-
-		set_transient( $transient_key, $this->feed_data, $this->get_transient_lifetime() );
-
-		$last_element = end( $this->feed_data );
-		$last_id      = $last_element->id;
-
-		if ( isset( $response->pagination->next_url ) && ( $response->pagination->next_max_id !== $last_id ) ) {
-			if ( $response->pagination->next_url !== '' ) {
-				$this->$calling_function( '', $response->pagination->next_url );
-			} 
-		}
+	private function get_limit() {
+		return $this->limit;
 	}
 }
