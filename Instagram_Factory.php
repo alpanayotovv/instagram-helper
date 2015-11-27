@@ -18,17 +18,14 @@ class Instagram_Factory {
 		'Posts_Store\Posts_Store'     => 'posts_store',
 	);
 
-	public static function create( $class, $params=array() ){
+	public static function create( $class, $user_conig = array() ){
 	
 		$instance = array_search( $class, self::$classes );
 
 		if ( ! $instance ) {
-			// error handler
-
+			return new \WP_Error( 'invalid_class_abbreviation', __( 'Please provide a valid class abbreviation for the factory. Possible values are "client", "data_manager", "carbon_helper", "post_store" ', 'crb' ));
 		} 
 
-		return new $instance( $params );
+		return new $instance( $user_conig );
 	}
-
-
 }
