@@ -39,6 +39,7 @@ class Posts_Store {
 				'_crb_instagram_comments_count'   => $entry->comments->count,
 				'_crb_instagram_user_name'        => $entry->user->username,
 				'_crb_instagram_filters'          => $entry->filter,
+				'_crb_instagram_entry_hashtags'	  => $entry->tags,
 			);
 
 			$post_for_update = get_posts( array(
