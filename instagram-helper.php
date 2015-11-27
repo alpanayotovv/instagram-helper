@@ -1,7 +1,8 @@
 <?php 
-include_once( 'Instagram_Factory.php' );
-include_once( 'Client.php' );
-include_once( 'Carbon_Helper.php' );
-include_once( 'Data_Manager.php' );
-include_once( 'Posts_Store.php' );
+$current_dir = dirname(__FILE__) . DIRECTORY_SEPARATOR;
 
+include_once( $current_dir . 'Instagram_Factory.php' );
+include_once( $current_dir . 'Client.php' );
+include_once( $current_dir . 'Carbon_Helper.php' );
+include_once( $current_dir . 'Data_Manager.php' );
+include_once( $current_dir . 'Posts_Store.php' );
