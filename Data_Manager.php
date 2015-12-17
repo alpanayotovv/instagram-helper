@@ -29,7 +29,7 @@ class Data_Manager {
 
 		$parameters = array(
 			'initial_url'      => $this->build_user_request_url( $call_params[ 'limit' ] ),
-			'request_url'      => $call_params[ 'request_url' ],
+			'request_url'      => isset( $call_params[ 'request_url' ] ) ? $call_params[ 'request_url' ] : '',
 			'request_function' => 'fetch_user_feed',
 		);
 
@@ -40,7 +40,7 @@ class Data_Manager {
 
 		$parameters = array(
 			'initial_url'      => $this->build_hashtag_request_url( $call_params[ 'hashtag' ], $call_params[ 'limit' ] ),
-			'request_url'      => $call_params[ 'request_url' ],
+			'request_url'      => isset( $call_params[ 'request_url' ] ) ? $call_params[ 'request_url' ] : '',
 			'request_function' => 'fetch_hashtag_feed',
 		);
 
