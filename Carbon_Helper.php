@@ -38,7 +38,7 @@ class Carbon_Helper {
 					->set_width( 50 ),
 				\Carbon_Field::factory('text', $this->client->carbon_config_fields[ 'client_secret' ], __( 'Client Secret', 'crb'))
 					->set_width( 50 ),
-				\Carbon_Field::factory('text', $this->client->carbon_config_fields[ 'redirect_url' ], __( 'Redirect URI', 'crb'))
+				\Carbon_Field::factory('text', $this->client->carbon_config_fields[ 'redirect_uri' ], __( 'Redirect URI', 'crb'))
 					->set_default_value( $this->client->get_redirect_uri() ),
 				\Carbon_Field::factory('html', 'crb_instragram_authenticate' )
 					->set_html( $this->auth_button() ),
