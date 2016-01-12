@@ -54,7 +54,7 @@ The `$data_manager` has the following methods:
 `$client  = Instagram_Factory\Instagram_Factory::create( 'client', $client_config );`  
 `$data_manager  = Instagram_Factory\Instagram_Factory::create( 'data_manager', array( 'limit' => 5 ) );`
 
-`$data_manager->get_user_feed();`  
+`$data_manager->fetch_user_feed();`  
 `$feed = $data_manager->get_feed_data(); //the data from instagram in now available in $feed`
 
 ---
