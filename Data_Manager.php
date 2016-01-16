@@ -28,8 +28,8 @@ class Data_Manager {
 	public function fetch_user_feed( $call_params = array() ) {
 
 		$parameters = array(
-			'initial_url'      => $this->build_user_request_url( $call_params[ 'limit' ] ),
-			'request_url'      => isset( $call_params[ 'request_url' ] ) ? $call_params[ 'request_url' ] : '',
+			'initial_url'      => $this->build_user_request_url( self::check_param( $call_params[ 'limit' ] ) ),
+			'request_url'      => self::check_param( $call_params[ 'request_url' ] ),
 			'request_function' => 'fetch_user_feed',
 		);
 
@@ -39,8 +39,8 @@ class Data_Manager {
 	public function fetch_hashtag_feed( $call_params = array() ){
 
 		$parameters = array(
-			'initial_url'      => $this->build_hashtag_request_url( $call_params[ 'hashtag' ], $call_params[ 'limit' ] ),
-			'request_url'      => isset( $call_params[ 'request_url' ] ) ? $call_params[ 'request_url' ] : '',
+			'initial_url'      => $this->build_hashtag_request_url( self::check_param( $call_params[ 'hashtag' ] ), self::check_param( $call_params[ 'limit' ] ) ),
+			'request_url'      => self::check_param( $call_params[ 'request_url' ] ),
 			'request_function' => 'fetch_hashtag_feed',
 		);
 
@@ -208,5 +208,9 @@ class Data_Manager {
 
 	private function get_limit() {
 		return $this->limit;
+	}
+
+	private static function check_param( $input ){
+		return isset( $input ) ? $input : '';
 	}
 }
