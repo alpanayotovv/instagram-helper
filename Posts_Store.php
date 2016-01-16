@@ -61,7 +61,7 @@ class Posts_Store {
 				$post_id = wp_insert_post( array(
 					'post_type'    => self::$post_type_name,
 					'post_title'   => $post_title,
-					'post_content' => $post_content,
+					'post_content' => self::add_links( $post_content ),
 					'post_status'  => 'publish',
 				));
 
@@ -110,5 +110,13 @@ class Posts_Store {
 		$post_type_settings   = apply_filters( 'crb_instagram_entry_settings', $post_type_settings );
 
 		register_post_type( self::$post_type_name, array_merge( array( 'labels' => $labels ), $post_type_settings ));
+	}
+
+	public static function add_links( $text ) {
+		$text = str_replace(array(/*':', '/', */'%'), array(/*'<wbr></wbr>:', '<wbr></wbr>/', */'<wbr></wbr>%'), $text);
+		$text = preg_replace('~(https?://([-\w\.]+)+(:\d+)?(/([\w/_\.]*(\?\S+)?)?)?)~', '<a href="$1" target="_blank">$1</a>', $text);
+		$text = preg_replace('~[\s]+@([a-zA-Z0-9_]+)~', ' <a href="https://instagram.com/$1" rel="nofollow" target="_blank">@$1</a>', $text);
+		$text = preg_replace('~#([a-zA-Z0-9]+)~', ' <a href="https://www.instagram.com/explore/tags/$1" rel="nofollow" target="_blank">#$1</a>', $text);
+		return $text;
 	}
 }
