@@ -12,12 +12,13 @@ class Carbon_Helper {
 		$this->client = $client;
 	}
 	
-	public function create_options_page(){
-		if ( ! class_exists( 'Carbon_Container' ) ){
+	public function create_options_page( $page_parent = '' ){
+		if ( ! class_exists( 'Carbon_Container' ) ){ 
 			return;
 		}
 
 		\Carbon_Container::factory('theme_options', __( 'Instagram Settings', 'crb' ))
+			->set_page_parent( $page_parent )
 			->add_fields( array(
 				\Carbon_Field::factory('html', 'crb_instagram_settings_html')
 					->set_html('
