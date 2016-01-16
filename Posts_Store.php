@@ -17,7 +17,6 @@ class Posts_Store {
 			$this->config = $user_config;
 		}
 
-		self::register_post_type();
 	}
 
 	public function save( $data ){
@@ -76,7 +75,7 @@ class Posts_Store {
 		}
 	}
 
-	private static function register_post_type(){
+	public static function register_post_type(){
 
 		$labels = array(
 			'name'               => __('Instagram Entries', 'crb'),
