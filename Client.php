@@ -14,6 +14,7 @@ class Client {
 
 	public $carbon_config_fields = array(
 		'user_name'     => 'crb_instagram_username',
+		'hashtags'      => 'crb_instagram_hashtags',
 		'client_id'     => 'crb_instagram_client_id',
 		'client_secret' => 'crb_instagram_client_secret',
 		'redirect_uri'  => 'crb_instagram_redirect_uri',

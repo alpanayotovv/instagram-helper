@@ -34,6 +34,8 @@ class Carbon_Helper {
 						</div>
 					'),
 				\Carbon_Field::factory('text', $this->client->carbon_config_fields[ 'user_name' ], __( 'Username', 'crb')),
+				\Carbon_Field::factory('textarea', $this->client->carbon_config_fields[ 'hashtags' ], __( 'Hashtags', 'crb'))
+					->set_help_text( __( 'Separate hashtags with a comma.', 'crb' ) ),
 				\Carbon_Field::factory('text', $this->client->carbon_config_fields[ 'client_id' ], __( 'Client ID', 'crb'))
 					->set_width( 50 ),
 				\Carbon_Field::factory('text', $this->client->carbon_config_fields[ 'client_secret' ], __( 'Client Secret', 'crb'))
