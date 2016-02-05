@@ -6,6 +6,9 @@
   * WordPress
   * Instagram Client Secret and Client Id :)
 
+##### Important!  
+If Instagram does not return anything after proper configuration of the code, please read this -- https://www.instagram.com/developer/review/
+
 #### Capabilities:
   * Fetch user feed by username.
   * Fetch Instagram posts by hashtag.
