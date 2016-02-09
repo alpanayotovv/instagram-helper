@@ -1,0 +1,18 @@
+{
+    "name": "alpanayotov/instagram-helper",
+    "description": "WordPress based library for retrieving and saving data from Instragram",
+    "keywords": ["wordpress", "instagram", "feed", "client"],
+    "homepage": "https://github.com/alpanayotov/instagram-helper",
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Alexander Panayotov",
+            "email": "alexander.panayotov@gmail.com"
+        }
+    ],
+    "require": {},
+    "autoload": {
+        "files": ["instagram-helper.php"]
+    }
+}
