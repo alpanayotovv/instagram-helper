@@ -112,8 +112,16 @@ class Client {
 	}
 
 	private function get_user_id(){
-		delete_option( 'crb_instagram_user_id' );
-		
+
+		$transient      = 'crb_cached_user_id_for_' . $this->config[ 'user_name' ];
+		$cached_user_id = get_transient( $transient );
+
+		if ( $cached_user_id ) {
+			update_option( 'crb_instagram_user_id', $cached_user_id );
+			set_transient( $transient, $cached_user_id, 24 * HOUR_IN_SECONDS );
+			return;
+		}
+
 		$base   = 'https://api.instagram.com/v1/users/search';
 		$params = array(
 			'q'         => $this->config[ 'user_name' ],
@@ -134,7 +142,8 @@ class Client {
 			if ( $entry->username !== $this->config[ 'user_name' ] ) {
 				continue;
 			}
-		
+			
+			set_transient( $transient, $entry->id, 24 * HOUR_IN_SECONDS );
 			update_option( 'crb_instagram_user_id', $entry->id );
 			break;
 		}
