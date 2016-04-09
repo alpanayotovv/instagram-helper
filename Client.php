@@ -5,7 +5,8 @@ namespace Client;
 * 
 */
 class Client { 
-	
+
+	private $return_url;
 	private $config = array(
 		'user_name'     => '',
 		'client_id'     => '',
@@ -23,15 +24,18 @@ class Client {
 	function __construct( $config_fields ){
 
 		if ( isset( $config_fields[ 'enable_carbon_support' ] ) && $config_fields[ 'enable_carbon_support' ] === true ) {
-			$this->config = $this->carbon_config_fields;
+			
+			$this->config     = $this->carbon_config_fields;
+			$this->return_url = admin_url( '/admin.php?page=crbn-instagram-settings.php' );
 
 			foreach ( $this->config as &$option ) {
 				$option = get_option( $option );
 			}
 
 		} else {
-			$this->config = $config_fields;
+			$this->config                   = $config_fields;
 			$this->config[ 'redirect_uri' ] = $this->get_redirect_uri();
+			$this->return_url               = admin_url();
 		}
 
 		if ( empty( $this->config ) ) {
@@ -41,6 +45,7 @@ class Client {
 		$this->get_user_id();
 		
 		add_action( 'wp_ajax_insta_code_detection', array( $this, 'get_access_token' ) );
+		add_action( 'wp_ajax_insta_delete_token', array( $this, 'delete_access_token' ) );
 	}
 
 	public function get_redirect_uri(){
@@ -58,6 +63,12 @@ class Client {
 
 		$url = add_query_arg( $params, $base ); 
 		
+		return $url;
+	}
+
+	public function generate_delete_token_url(){
+		$url = admin_url( '/admin-ajax.php?action=insta_delete_token' );
+
 		return $url;
 	}
 
@@ -87,8 +98,16 @@ class Client {
 		
 		if ( isset ( $request_body->access_token ) ) {
 			update_option( 'crb_instagram_access_token', $request_body->access_token );
-			_e('Authentication completed!', 'crb');
+			wp_redirect( $this->return_url );
 		}
+
+		exit;
+	}
+
+	public function delete_access_token(){
+		delete_option( 'crb_instagram_access_token' );
+		
+		wp_redirect( $this->return_url );
 		exit;
 	}
 
