@@ -1,5 +1,6 @@
 <?php 
 namespace Client;
+use Notice_Manager\Notice_Manager;
 
 /**
 * 
@@ -7,6 +8,8 @@ namespace Client;
 class Client { 
 
 	private $return_url;
+	private static $notices;
+
 	private $config = array(
 		'user_name'     => '',
 		'client_id'     => '',
@@ -43,6 +46,8 @@ class Client {
 		}
 
 		$this->get_user_id();
+
+		self::$notices = new Notice_Manager();
 		
 		add_action( 'wp_ajax_insta_code_detection', array( $this, 'get_access_token' ) );
 		add_action( 'wp_ajax_insta_delete_token', array( $this, 'delete_access_token' ) );
@@ -91,13 +96,24 @@ class Client {
 		$token_request = wp_remote_post( $url, array( 'body' => $params ) );
 
 		if ( is_wp_error( $token_request ) || ( $token_request[ 'response' ][ 'code' ] !== 200 ) )  { 
-			return;
+
+			if ( is_wp_error( $token_request ) ) {
+				self::$notices->add_notice( 'error', $token_request->get_error_message() );
+			} else {
+				self::$notices->add_notice( 'error', __( 'Something went wrong. Please check your configuration and try again.', 'crb' ) );
+			}
+
+			wp_redirect( $this->return_url );
+			exit;
 		}
 
 		$request_body = json_decode( $token_request[ 'body' ] );
 		
 		if ( isset ( $request_body->access_token ) ) {
 			update_option( 'crb_instagram_access_token', $request_body->access_token );
+			
+			self::$notices->add_notice( 'success', __( 'Instagram authentication completed successfully!', 'crb' ));
+
 			wp_redirect( $this->return_url );
 		}
 
@@ -106,6 +122,8 @@ class Client {
 
 	public function delete_access_token(){
 		delete_option( 'crb_instagram_access_token' );
+
+		self::$notices->add_notice( 'success', __( 'Instagram access token deleted successfully!', 'crb' ));
 		
 		wp_redirect( $this->return_url );
 		exit;
@@ -117,6 +135,7 @@ class Client {
 		$cached_user_id = get_transient( $transient );
 
 		if ( $cached_user_id ) {
+
 			update_option( 'crb_instagram_user_id', $cached_user_id );
 			set_transient( $transient, $cached_user_id, 24 * HOUR_IN_SECONDS );
 			return;
