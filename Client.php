@@ -1,8 +1,6 @@
 <?php 
 namespace Instagram_Helper;
 
-use Instagram_Helper\Notice_Manager;
-
 /**
 * 
 */
