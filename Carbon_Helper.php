@@ -1,5 +1,5 @@
 <?php 
-namespace Carbon_Helper;
+namespace Instagram_Helper;
 use Carbon_Fields\Container\Container;
 use Carbon_Fields\Field\Field;
 

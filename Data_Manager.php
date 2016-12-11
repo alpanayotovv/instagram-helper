@@ -1,5 +1,5 @@
 <?php 
-namespace Data_Manager;
+namespace Instagram_Helper;
 
 class Data_Manager {
 	
