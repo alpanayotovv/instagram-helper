@@ -1,5 +1,5 @@
 <?php 
-namespace Posts_Store;
+namespace Instagram_Helper;
 
 /**
 * 

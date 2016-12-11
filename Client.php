@@ -1,6 +1,7 @@
 <?php 
-namespace Client;
-use Notice_Manager\Notice_Manager;
+namespace Instagram_Helper;
+
+use Instagram_Helper\Notice_Manager;
 
 /**
 * 

@@ -1,5 +1,5 @@
 <?php 
-namespace Notice_Manager;
+namespace Instagram_Helper;
 
 class Notice_Manager {
 
