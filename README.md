@@ -1,4 +1,4 @@
-# _This projects is not maintained at the moment._ 
+# _This project is not maintained at the moment._ 
 
 ---
 
