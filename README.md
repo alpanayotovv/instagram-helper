@@ -1,3 +1,7 @@
+# _This projects is not maintained at the moment._ 
+
+---
+
 # Instagram Helper
 ##### WordPress based library for retrieving and saving data from Instragram.
 
